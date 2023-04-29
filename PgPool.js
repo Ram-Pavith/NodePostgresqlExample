@@ -35,16 +35,37 @@ app.post("/api/PostUserId",async (req,res)=>{
     try{
         pool.query(`insert into ids values($1,$2)`,[id,name])
     }catch(ex){
-        console.log(ex.message)
+        console.log("post error |"+ex.message)
     }
     //res = res.json
     //console.log(req.params)
 
 })
-app.post("/post",async (req,res)=>{
+
+
+app.put("/api/PutUserId",async (req,res)=>{
+    const {id,name} = req.body
     const out = req.body
     console.log(out)
+    res.setHeader("Content-Type", "application/json")
     res.send(req.body)
+    try{
+        pool.query(`update ids set name=$2 where id=$1`,[id,name])
+    }
+    catch(ex){
+        console.log("Put error |"+ex.message)
+    }
+    
 })
 
+app.delete("/api/RemoveUserId",async (req,res)=>{
+    const {id} = req.body
+    try{
+        console.log("Deleting id:"+id+" from the database")
+        pool.query(`delete from ids where id=$1`,[id])
+        res.send("Deleting id:"+id+" from the database")
+    }catch(ex){
+        console.log("Delete error|"+ex.message)
+    }
+})
 app.listen(5001,console.log("listening in port 5000"))
