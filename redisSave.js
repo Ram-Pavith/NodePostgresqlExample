@@ -1,17 +1,19 @@
 const express = require('express');
 const fetch = import('node-fetch');
 const redis = require('redis');
+const axios = require('axios')
 
-const PORT = process.env.PORT || 5001;
-const REDIS_PORT = process.env.PORT || 6379;
+const PORT = process.env.PORT || 5004;
+const REDIS_PORT = process.env.PORT || 6380;
 
-const client = redis.createClient({ socket: { port: 6379 } });
-
-client.connect();
-
+const client = redis.createClient({ socket: { port: REDIS_PORT } });
+(async ()=>{
+  await client.connect()
+})()
 client.on('connect', () => {
     console.log('Redis connected');
 });
+
 const app = express();
 
 // Set response
@@ -26,7 +28,7 @@ async function getRepos(req, res, next) {
 
     const { username } = req.params;
 
-    const response = await fetch(`https://api.github.com/users/${username}`);
+    const response = await axios.get(`https://api.github.com/users/${username}`);
 
     const data = await response.json();
 
@@ -57,7 +59,7 @@ function cache(req, res, next) {
   });
 }
 
-app.get('/repos:username', cache,getRepos);
+app.get(`/repos/:username`, cache,getRepos);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
